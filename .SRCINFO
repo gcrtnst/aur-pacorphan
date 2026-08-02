@@ -1,0 +1,14 @@
+pkgbase = pacorphan
+	pkgdesc = A smarter alternative to "pacman -Qdt"
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/gcrtnst/pacorphan
+	arch = x86_64
+	license = Unlicense
+	checkdepends = util-linux
+	makedepends = go
+	depends = pacman
+	source = https://github.com/gcrtnst/pacorphan/archive/v0.1.0/pacorphan-0.1.0.tar.gz
+	sha256sums = 6619194a520dd4f318ef42914398eeccbe4ccff49e18f1450d872e01bf47d99c
+
+pkgname = pacorphan
