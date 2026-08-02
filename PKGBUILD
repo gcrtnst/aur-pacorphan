@@ -8,10 +8,10 @@ arch=('x86_64')
 url='https://github.com/gcrtnst/pacorphan'
 license=('Unlicense')
 depends=('glibc' 'pacman')
-makedepends=('go')
+makedepends=('git' 'go')
 checkdepends=('util-linux')
-source=("$url/archive/v$pkgver/$pkgname-$pkgver.tar.gz")
-sha256sums=('6619194a520dd4f318ef42914398eeccbe4ccff49e18f1450d872e01bf47d99c')
+source=("$pkgname::git+$url#tag=v$pkgver")
+sha256sums=('87340bfb9aea00209609f36aec7a3bbaab352f46a480a0e97915c45543b72110')
 
 _gobuildflags=(
   '-trimpath'
@@ -19,7 +19,7 @@ _gobuildflags=(
   '-mod=vendor'
   '-modcacherw'
   '-ldflags=-linkmode=external'
-  '-buildvcs=false'
+  '-buildvcs=true'
 )
 
 _go() {
@@ -29,7 +29,7 @@ _go() {
   local -x CGO_CXXFLAGS="${CXXFLAGS}"
   local -x CGO_FFLAGS="${FFLAGS}"
   local -x CGO_LDFLAGS="${LDFLAGS}"
-  local -x GOPATH="$srcdir"
+  local -x GOPATH="$srcdir/gopath"
 
   go "$@"
 }
@@ -43,19 +43,25 @@ _go_test() {
 }
 
 prepare() {
-  cd "$pkgname-$pkgver"
+  cd "$pkgname"
+
+  # Prevent "+dirty" from appearing in "pacorphan --version"
+  # by excluding generated directories.
+  echo "/vendor/" >> .git/info/exclude
+  echo "/build/"  >> .git/info/exclude
+
   _go mod vendor -v
 }
 
 build() {
-  cd "$pkgname-$pkgver"
+  cd "$pkgname"
 
   mkdir -p build/
   _go_build -v -o "build/$pkgname" .
 }
 
 check() {
-  cd "$pkgname-$pkgver"
+  cd "$pkgname"
 
   mkdir -p build/
   _go_build -v -o "build/alpmtest" ./internal/alpmtest
@@ -67,7 +73,8 @@ check() {
 }
 
 package() {
-  cd "$pkgname-$pkgver"
+  cd "$pkgname"
+
   install -vDm755 -t "$pkgdir/usr/bin/" "build/$pkgname"
   install -vDm644 -t "$pkgdir/usr/share/licenses/$pkgname/" LICENSE
 }
