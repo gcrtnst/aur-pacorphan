@@ -14,11 +14,10 @@ source=("$pkgname::git+$url#tag=v$pkgver")
 sha256sums=('87340bfb9aea00209609f36aec7a3bbaab352f46a480a0e97915c45543b72110')
 
 _gobuildflags=(
-  '-trimpath'
   '-buildmode=pie'
   '-mod=vendor'
   '-modcacherw'
-  '-ldflags=-linkmode=external'
+  '-ldflags=-compressdwarf=false -linkmode=external'
   '-buildvcs=true'
 )
 
