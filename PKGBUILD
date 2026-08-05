@@ -13,12 +13,16 @@ checkdepends=('util-linux')
 source=("$pkgname::git+$url#tag=v$pkgver")
 sha256sums=('87340bfb9aea00209609f36aec7a3bbaab352f46a480a0e97915c45543b72110')
 
+_gomodflags=(
+  '-modcacherw'
+)
+
 _gobuildflags=(
   '-buildmode=pie'
   '-mod=vendor'
-  '-modcacherw'
   '-ldflags=-compressdwarf=false -linkmode=external'
   '-buildvcs=true'
+  "${_gomodflags[@]}"
 )
 
 _go() {
@@ -33,14 +37,6 @@ _go() {
   go "$@"
 }
 
-_go_build() {
-  _go build "${_gobuildflags[@]}" "$@"
-}
-
-_go_test() {
-  _go test "${_gobuildflags[@]}" "$@"
-}
-
 prepare() {
   cd "$pkgname"
 
@@ -49,24 +45,24 @@ prepare() {
   echo "/vendor/" >> .git/info/exclude
   echo "/build/"  >> .git/info/exclude
 
-  _go mod vendor -v
+  _go mod vendor "${_gomodflags[@]}" -v
 }
 
 build() {
   cd "$pkgname"
 
   mkdir -p build/
-  _go_build -v -o "build/$pkgname" .
+  _go build "${_gobuildflags[@]}" -v -o "build/$pkgname" .
 }
 
 check() {
   cd "$pkgname"
 
   mkdir -p build/
-  _go_build -v -o "build/alpmtest" ./internal/alpmtest
-  _go_build -v -o "build/pacorphantest" ./internal/pacorphantest
+  _go build "${_gobuildflags[@]}" -v -o "build/alpmtest" ./internal/alpmtest
+  _go build "${_gobuildflags[@]}" -v -o "build/pacorphantest" ./internal/pacorphantest
 
-  _go_test -v ./...
+  _go test -v ./...
   build/alpmtest
   build/pacorphantest --cmd "build/$pkgname"
 }
